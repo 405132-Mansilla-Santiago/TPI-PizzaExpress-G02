@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        # Ruta de prueba: /orders/health → proxya /actuator/health del order-service
+        - id: order-health
+          uri: http://order-service:8081
+          predicates:
+            - Path=/orders/health
+          filters:
+            - SetPath=/actuator/health
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      enabled: true

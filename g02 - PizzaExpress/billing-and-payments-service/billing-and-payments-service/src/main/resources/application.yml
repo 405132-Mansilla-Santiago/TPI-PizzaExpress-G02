@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: billing-and-payments-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${BILLING_PAYMENTS_DB}
+    username: ${BILLING_PAYMENTS_DB_USER}
+    password: ${BILLING_PAYMENTS_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8085
