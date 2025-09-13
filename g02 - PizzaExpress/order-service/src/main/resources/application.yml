@@ -26,6 +26,6 @@ app:
   name: ${APP_NAME:Order Service}
   desc: ${APP_DESC:Servicio de gestión de pedidos}
   version: ${APP_VERSION:1.0.0}
-  dev-name: ${APP_DEV_NAME:PizzaExpress Orders}
+  dev-name: ${APP_DEV_NAME:Example Dev}
   dev-email: ${APP_DEV_EMAIL:dev@example.com}
 

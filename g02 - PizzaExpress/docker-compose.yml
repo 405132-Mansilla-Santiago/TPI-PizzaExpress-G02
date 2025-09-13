@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pizza_order # base por defecto
+      POSTGRES_DB: pizza_order
     ports:
       - "5432:5432"
     volumes:
@@ -21,30 +21,214 @@ services:
   order-service:
     build:
       context: .
-      dockerfile: order-service/Dockerfile   # <-- Dockerfile del módulo
+      dockerfile: order-service/Dockerfile
     image: pizza/order-service
     container_name: order-service
     environment:
-      # Spring Datasource (usa la base creada arriba)
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pizza_order
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      # Opcional JPA/Hibernate para dev:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ordersdb
+      SPRING_DATASOURCE_USERNAME: order
+      SPRING_DATASOURCE_PASSWORD: order
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      # Actuator management (por si lo querés distinto)
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
       SERVER_PORT: 8081
       APP_URL: http://order-service:8081
     ports:
-      - "8081:8081"   # publicar para probar directo
-    expose:
-      - "8081"
+      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  billing-and-payments-service:
+    build:
+      context: .
+      dockerfile: billing-and-payments-service/Dockerfile
+    image: pizza/billing-and-payments-service
+    container_name: billing-and-payments-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/billingpaymentsdb
+      SPRING_DATASOURCE_USERNAME: billingpayments
+      SPRING_DATASOURCE_PASSWORD: billingpayments
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8082
+      APP_URL: http://billing-and-payments-service:8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    image: pizza/customer-service
+    container_name: customer-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customerdb
+      SPRING_DATASOURCE_USERNAME: customer
+      SPRING_DATASOURCE_PASSWORD: customer
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8083
+      APP_URL: http://customer-service:8083
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  delivery-service:
+    build:
+      context: .
+      dockerfile: delivery-service/Dockerfile
+    image: pizza/delivery-service
+    container_name: delivery-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/deliverydb
+      SPRING_DATASOURCE_USERNAME: delivery
+      SPRING_DATASOURCE_PASSWORD: delivery
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8084
+      APP_URL: http://delivery-service:8084
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    image: pizza/inventory-service
+    container_name: inventory-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/inventorydb
+      SPRING_DATASOURCE_USERNAME: inventory
+      SPRING_DATASOURCE_PASSWORD: inventory
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8085
+      APP_URL: http://inventory-service:8085
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  kitchen-service:
+    build:
+      context: .
+      dockerfile: kitchen-service/Dockerfile
+    image: pizza/kitchen-service
+    container_name: kitchen-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kitchendb
+      SPRING_DATASOURCE_USERNAME: kitchen
+      SPRING_DATASOURCE_PASSWORD: kitchen
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8086
+      APP_URL: http://kitchen-service:8086
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8086/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  report-service:
+    build:
+      context: .
+      dockerfile: report-service/Dockerfile
+    image: pizza/report-service
+    container_name: report-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/reportdb
+      SPRING_DATASOURCE_USERNAME: report
+      SPRING_DATASOURCE_PASSWORD: report
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8087
+      APP_URL: http://report-service:8087
+    ports:
+      - "8087:8087"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8087/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [pizza]
+
+  supplier-service:
+    build:
+      context: .
+      dockerfile: supplier-service/Dockerfile
+    image: pizza/supplier-service
+    container_name: supplier-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/supplierdb
+      SPRING_DATASOURCE_USERNAME: supplier
+      SPRING_DATASOURCE_PASSWORD: supplier
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8088
+      APP_URL: http://supplier-service:8088
+    ports:
+      - "8088:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8088/actuator/health | grep -q 'UP'"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -59,6 +243,20 @@ services:
     ports: ["8080:8080"]
     depends_on:
       order-service:
+        condition: service_healthy
+      billing-and-payments-service:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      delivery-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      kitchen-service:
+        condition: service_healthy
+      report-service:
+        condition: service_healthy
+      supplier-service:
         condition: service_healthy
     networks: [pizza]
 

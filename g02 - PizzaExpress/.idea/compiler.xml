@@ -2,27 +2,28 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="delivery-service" />
+        <module name="supplier-service" />
+        <module name="inventory-service" />
+        <module name="customer-service" />
+        <module name="billing-and-payments-service" />
+        <module name="report-service" />
+        <module name="order-service" />
+        <module name="kitchen-service" />
+      </profile>
       <profile name="Annotation profile for pizzaexpress" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
-        <module name="supplier-service" />
-        <module name="delivery-service" />
-        <module name="inventory-service" />
-        <module name="customer-service" />
-        <module name="billing-and-payments-service" />
-        <module name="report-service" />
-        <module name="kitchen-service" />
         <module name="gateway" />
-      </profile>
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="order-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
