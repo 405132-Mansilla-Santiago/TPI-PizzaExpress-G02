@@ -5,6 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pizza_order # base por defecto
     ports:
       - "5432:5432"
     volumes:
@@ -17,177 +18,47 @@ services:
       retries: 10
     networks: [pizza]
 
-  gateway:
-    build:
-      context: ./gateway/gateway
-      dockerfile: Dockerfile
-    container_name: gateway
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      order-service:
-        condition: service_started
-      kitchen-service:
-        condition: service_started
-      inventory-service:
-        condition: service_started
-      supplier-service:
-        condition: service_started
-      billing-and-payments-service:
-        condition: service_started
-      delivery-service:
-        condition: service_started
-      customer-service:
-        condition: service_started
-      report-service:
-        condition: service_started
-    networks: [pizza]
-
   order-service:
     build:
-      context: ./order-service/order-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: order-service/Dockerfile   # <-- Dockerfile del módulo
+    image: pizza/order-service
     container_name: order-service
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      ORDER_DB: ${ORDER_DB}
-      ORDER_DB_USER: ${ORDER_DB_USER}
-      ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      # Spring Datasource (usa la base creada arriba)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pizza_order
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # Opcional JPA/Hibernate para dev:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      # Actuator management (por si lo querés distinto)
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      SERVER_PORT: 8081
+      APP_URL: http://order-service:8081
     ports:
-      - "8081:8081"
+      - "8081:8081"   # publicar para probar directo
+    expose:
+      - "8081"
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
     networks: [pizza]
 
-  kitchen-service:
+  gateway:
     build:
-      context: ./kitchen-service/kitchen-service
-      dockerfile: Dockerfile
-    container_name: kitchen-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      KITCHEN_DB: ${KITCHEN_DB}
-      KITCHEN_DB_USER: ${KITCHEN_DB_USER}
-      KITCHEN_DB_PASSWORD: ${KITCHEN_DB_PASSWORD}
-    ports:
-      - "8082:8082"
+      context: .
+      dockerfile: gateway/Dockerfile
+    image: pizza/gateway
+    container_name: gateway
+    ports: ["8080:8080"]
     depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  inventory-service:
-    build:
-      context: ./inventory-service/inventory-service
-      dockerfile: Dockerfile
-    container_name: inventory-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      INVENTORY_DB: ${INVENTORY_DB}
-      INVENTORY_DB_USER: ${INVENTORY_DB_USER}
-      INVENTORY_DB_PASSWORD: ${INVENTORY_DB_PASSWORD}
-    ports:
-      - "8083:8083"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  supplier-service:
-    build:
-      context: ./supplier-service/supplier-service
-      dockerfile: Dockerfile
-    container_name: supplier-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      SUPPLIER_DB: ${SUPPLIER_DB}
-      SUPPLIER_DB_USER: ${SUPPLIER_DB_USER}
-      SUPPLIER_DB_PASSWORD: ${SUPPLIER_DB_PASSWORD}
-    ports:
-      - "8084:8084"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  billing-and-payments-service:
-    build:
-      context: ./billing-and-payments-service/billing-and-payments-service
-      dockerfile: Dockerfile
-    container_name: billing-and-payments-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      BILLING_PAYMENTS_DB: ${BILLING_PAYMENTS_DB}
-      BILLING_PAYMENTS_DB_USER: ${BILLING_PAYMENTS_DB_USER}
-      BILLING_PAYMENTS_DB_PASSWORD: ${BILLING_PAYMENTS_DB_PASSWORD}
-    ports:
-      - "8085:8085"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  delivery-service:
-    build:
-      context: ./delivery-service/delivery-service
-      dockerfile: Dockerfile
-    container_name: delivery-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      DELIVERY_DB: ${DELIVERY_DB}
-      DELIVERY_DB_USER: ${DELIVERY_DB_USER}
-      DELIVERY_DB_PASSWORD: ${DELIVERY_DB_PASSWORD}
-    ports:
-      - "8086:8086"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  customer-service:
-    build:
-      context: ./customer-service/customer-service
-      dockerfile: Dockerfile
-    container_name: customer-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      CUSTOMER_DB: ${CUSTOMER_DB}
-      CUSTOMER_DB_USER: ${CUSTOMER_DB_USER}
-      CUSTOMER_DB_PASSWORD: ${CUSTOMER_DB_PASSWORD}
-    ports:
-      - "8087:8087"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [pizza]
-
-  report-service:
-    build:
-      context: ./report-service/report-service
-      dockerfile: Dockerfile
-    container_name: report-service
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      REPORT_DB: ${REPORT_DB}
-      REPORT_DB_USER: ${REPORT_DB_USER}
-      REPORT_DB_PASSWORD: ${REPORT_DB_PASSWORD}
-    ports:
-      - "8088:8088"
-    depends_on:
-      postgres:
+      order-service:
         condition: service_healthy
     networks: [pizza]
 
