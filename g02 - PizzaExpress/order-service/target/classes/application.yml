@@ -1,0 +1,31 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    properties:
+      hibernate:
+        dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info}
+
+app:
+  url: ${APP_URL:http://order-service:8081}
+  name: ${APP_NAME:Order Service}
+  desc: ${APP_DESC:Servicio de gestión de pedidos}
+  version: ${APP_VERSION:1.0.0}
+  dev-name: ${APP_DEV_NAME:Example Dev}
+  dev-email: ${APP_DEV_EMAIL:dev@example.com}
+
