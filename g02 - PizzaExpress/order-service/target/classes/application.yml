@@ -17,6 +17,10 @@ spring:
       hibernate:
         dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
 management:
   endpoints:
     web:

@@ -1,6 +1,6 @@
 package com.example.order_service.services.impl;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -16,9 +16,11 @@ import com.example.order_service.repositories.OrderRepository;
 import com.example.order_service.services.OrderService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -27,26 +29,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderModel createOrder(OrderCreateRequest request) {
 
-        // Map DTO → Model
         OrderModel model = mapper.map(request, OrderModel.class);
 
         model.setStatus(OrderStatus.PENDING);
-        model.setCreatedAt(LocalDateTime.now());
-        model.setUpdatedAt(LocalDateTime.now());
+        model.setCreatedAt(OffsetDateTime.now());
+        model.setUpdatedAt(OffsetDateTime.now());
 
-        // Calculate total
         double total = model.getItems().stream()
                 .mapToDouble(i -> i.getUnitPrice() * i.getQuantity())
                 .sum();
         model.setTotal(total);
 
-        // Map Model → Entity
         Order entity = mapper.map(model, Order.class);
 
-        // Fix parent relationship
         entity.getItems().forEach(item -> item.setOrder(entity));
 
-        // Save
+        entity.setId(null);
+        entity.getItems().forEach(i -> i.setId(null));
+
         Order saved = orderRepository.save(entity);
 
         return mapper.map(saved, OrderModel.class);
@@ -56,10 +56,9 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderModel> listOrders(
             OrderStatus status,
             OrderChannel channel,
-            LocalDateTime from,
-            LocalDateTime to,
-            Pageable pageable
-    ) {
+            OffsetDateTime from,
+            OffsetDateTime to,
+            Pageable pageable) {
         return orderRepository
                 .filterOrders(status, channel, from, to, pageable)
                 .map(entity -> mapper.map(entity, OrderModel.class));
@@ -78,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         entity.setStatus(newStatus);
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now());
 
         Order updated = orderRepository.save(entity);
         return mapper.map(updated, OrderModel.class);
@@ -90,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         entity.setStatus(OrderStatus.CANCELLED);
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now());
 
         orderRepository.save(entity);
     }

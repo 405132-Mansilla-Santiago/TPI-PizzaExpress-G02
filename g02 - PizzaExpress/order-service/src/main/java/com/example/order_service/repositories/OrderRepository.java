@@ -1,6 +1,6 @@
 package com.example.order_service.repositories;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,17 +15,18 @@ import com.example.order_service.domain.enums.OrderStatus;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
-        SELECT o FROM Order o
-        WHERE (:status IS NULL OR o.status = :status)
-        AND (:channel IS NULL OR o.channel = :channel)
-        AND (:fromDate IS NULL OR o.createdAt >= :fromDate)
-        AND (:toDate IS NULL OR o.createdAt <= :toDate)
+    SELECT o FROM Order o
+    WHERE (COALESCE(:status, o.status) = o.status)
+    AND (COALESCE(:channel, o.channel) = o.channel)
+    AND (COALESCE(:fromDate, o.createdAt) <= o.createdAt)
+    AND (COALESCE(:toDate, o.createdAt) >= o.createdAt)
     """)
-    Page<Order> filterOrders(
-            @Param("status") OrderStatus status,
-            @Param("channel") OrderChannel channel,
-            @Param("fromDate") LocalDateTime from,
-            @Param("toDate") LocalDateTime to,
-            Pageable pageable
-    );
+Page<Order> filterOrders(
+        @Param("status") OrderStatus status,
+        @Param("channel") OrderChannel channel,
+        @Param("fromDate") OffsetDateTime from,
+        @Param("toDate") OffsetDateTime to,
+        Pageable pageable
+);
+
 }

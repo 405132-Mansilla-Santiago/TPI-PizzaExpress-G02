@@ -6,9 +6,15 @@ spring:
     name: gateway
   cloud:
     gateway:
+      httpclient:
+        wiretap: true
+        pool:
+          maxConnections: 500
+      loadbalancer:
+        use404: true
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-      globals:
+      global:
         corsConfigurations:
           "[/**]":
             allowedOrigins: "*"
@@ -17,55 +23,63 @@ spring:
       server:
         webflux:
           routes:
-            - id: order-service-root
-              uri: http://order-service:8081
-              predicates:
-                - Path=/api/orders
-              filters:
-                - SetPath=/status
-
-              # 2) Ruta general: /api/orders/** → strip /api/orders/
             - id: order-service
               uri: http://order-service:8081
-              predicates:
-                - Path=/api/orders/**
+              predicates: [ Path=/api/orders/** ]
               filters:
                 - RewritePath=/api/orders/?(?<segment>.*), /${segment}
 
-            - id: kitchen
-              uri: http://kitchen-service:8082
-              predicates: [ Path=/api/kitchen/** ]
-              filters:   [ StripPrefix=1 ]
+            - id: billing-and-payments-service-billing
+              uri: http://billing-and-payments-service:8082
+              predicates:
+                - Path=/api/billing/**
+              filters:
+                - RewritePath=/api/billing/?(?<segment>.*), /${segment}
 
-            - id: inventory
-              uri: http://inventory-service:8083
-              predicates: [ Path=/api/inventory/** ]
-              filters:   [ StripPrefix=1 ]
+            - id: billing-and-payments-service-payments
+              uri: http://billing-and-payments-service:8082
+              predicates:
+                - Path=/api/payments/**
+              filters:
+                - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
-            - id: suppliers
-              uri: http://supplier-service:8084
-              predicates: [ Path=/api/suppliers/**, Path=/api/purchase-orders/** ]
-              filters:   [ StripPrefix=1 ]
+            - id: customer-service
+              uri: http://customer-service:8083
+              predicates:
+                - Path=/api/customers/**
+              filters:
+                - RewritePath=/api/(customers)/?(?<segment>.*), /${segment}
 
-            - id: billing-and-payments
-              uri: http://billing-service:8085
-              predicates: [ Path=/api/billing/**, Path=/api/payments/** ]
-              filters:   [ StripPrefix=1 ]
-
-            - id: delivery
-              uri: http://delivery-service:8086
+            - id: delivery-service
+              uri: http://delivery-service:8084
               predicates: [ Path=/api/delivery/** ]
-              filters:   [ StripPrefix=1 ]
+              filters:
+                - RewritePath=/api/delivery/?(?<segment>.*), /${segment}
 
-            - id: customers
-              uri: http://customer-service:8087
-              predicates: [ Path=/api/customers/**, Path=/api/loyalty/** ]
-              filters:   [ StripPrefix=1 ]
+            - id: inventory-service
+              uri: http://inventory-service:8085
+              predicates: [ Path=/api/inventory/** ]
+              filters:
+                - RewritePath=/api/inventory/?(?<segment>.*), /${segment}
 
-            - id: reports
-              uri: http://report-service:8088
+            - id: kitchen-service
+              uri: http://kitchen-service:8086
+              predicates: [ Path=/api/kitchen/** ]
+              filters:
+                - RewritePath=/api/kitchen/?(?<segment>.*), /${segment}
+
+            - id: report-service
+              uri: http://report-service:8087
               predicates: [ Path=/api/reports/** ]
-              filters:   [ StripPrefix=1 ]
+              filters:
+                - RewritePath=/api/reports/?(?<segment>.*), /${segment}
+
+            - id: supplier-service
+              uri: http://supplier-service:8088
+              predicates:
+                - Path=/api/suppliers/**
+              filters:
+                - RewritePath=/api/(suppliers)/?(?<segment>.*), /${segment}
 
 management:
   endpoints:

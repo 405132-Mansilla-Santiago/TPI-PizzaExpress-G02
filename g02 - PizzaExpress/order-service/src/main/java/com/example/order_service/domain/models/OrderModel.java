@@ -1,6 +1,6 @@
 package com.example.order_service.domain.models;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.example.order_service.domain.enums.OrderChannel;
@@ -21,6 +21,6 @@ public class OrderModel {
     private List<OrderItemModel> items;
     private Double total;
     private OrderStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

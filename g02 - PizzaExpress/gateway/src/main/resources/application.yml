@@ -6,6 +6,12 @@ spring:
     name: gateway
   cloud:
     gateway:
+      httpclient:
+        wiretap: true
+        pool:
+          maxConnections: 500
+      loadbalancer:
+        use404: true
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       global:

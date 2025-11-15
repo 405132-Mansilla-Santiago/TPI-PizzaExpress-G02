@@ -1,6 +1,6 @@
 package com.example.order_service.services;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +17,8 @@ public interface OrderService {
     Page<OrderModel> listOrders(
             OrderStatus status,
             OrderChannel channel,
-            LocalDateTime from,
-            LocalDateTime to,
+            OffsetDateTime from,
+            OffsetDateTime to,
             Pageable pageable
     );
 
