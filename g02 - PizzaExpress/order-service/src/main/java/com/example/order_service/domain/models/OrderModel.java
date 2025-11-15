@@ -17,7 +17,7 @@ public class OrderModel {
 
     private Long id;
     private OrderChannel channel;
-    private String customerName;
+    private String customerId;
     private List<OrderItemModel> items;
     private Double total;
     private OrderStatus status;

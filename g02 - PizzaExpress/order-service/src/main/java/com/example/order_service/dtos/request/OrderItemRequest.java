@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemRequest {
 
     @NotBlank
-    private String productName;
+    private String productId;
 
     @NotNull @Min(1)
     private Integer quantity;

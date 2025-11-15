@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemModel {
 
     private Long id;
-    private String productName;
+    private String productId;
     private Integer quantity;
     private Double unitPrice;
 }

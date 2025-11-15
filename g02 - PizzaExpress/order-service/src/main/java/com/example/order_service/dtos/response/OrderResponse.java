@@ -17,7 +17,7 @@ public class OrderResponse {
 
     private Long id;
     private OrderChannel channel;
-    private String customerName;
+    private String customerId;
     private List<OrderItemResponse> items;
     private Double total;
     private OrderStatus status;

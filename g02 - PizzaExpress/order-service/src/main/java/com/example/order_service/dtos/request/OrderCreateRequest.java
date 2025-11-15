@@ -19,7 +19,7 @@ public class OrderCreateRequest {
     @NotNull
     private OrderChannel channel;
 
-    private String customerName;
+    private String customerId;
 
     @NotEmpty
     @Valid

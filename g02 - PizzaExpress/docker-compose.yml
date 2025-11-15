@@ -20,10 +20,13 @@ services:
 
   order-service:
     build:
-      context: .
-      dockerfile: order-service/Dockerfile
-    image: pizza/order-service
+      context: ./order-service
+      dockerfile: Dockerfile
     container_name: order-service
+    volumes:
+      - ./order-service/src:/app/src
+      - ./order-service/pom.xml:/app/pom.xml
+      - ~/.m2:/root/.m2
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ordersdb
       SPRING_DATASOURCE_USERNAME: order
@@ -241,23 +244,23 @@ services:
     image: pizza/gateway
     container_name: gateway
     ports: ["8080:8080"]
-    depends_on:
-      order-service:
-        condition: service_healthy
-      billing-and-payments-service:
-        condition: service_healthy
-      customer-service:
-        condition: service_healthy
-      delivery-service:
-        condition: service_healthy
-      inventory-service:
-        condition: service_healthy
-      kitchen-service:
-        condition: service_healthy
-      report-service:
-        condition: service_healthy
-      supplier-service:
-        condition: service_healthy
+    # depends_on:
+    #   order-service:
+    #     condition: service_healthy
+    #   billing-and-payments-service:
+    #     condition: service_healthy
+    #   customer-service:
+    #     condition: service_healthy
+    #   delivery-service:
+    #     condition: service_healthy
+    #   inventory-service:
+    #     condition: service_healthy
+    #   kitchen-service:
+    #     condition: service_healthy
+    #   report-service:
+    #     condition: service_healthy
+    #   supplier-service:
+    #     condition: service_healthy
     networks: [pizza]
 
 networks:
