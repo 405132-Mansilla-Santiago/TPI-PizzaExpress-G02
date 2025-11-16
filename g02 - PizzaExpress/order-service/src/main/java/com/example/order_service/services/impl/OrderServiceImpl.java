@@ -84,13 +84,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancelOrder(Long id) {
+    public OrderModel cancelOrder(Long id) {
         Order entity = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         entity.setStatus(OrderStatus.CANCELLED);
         entity.setUpdatedAt(OffsetDateTime.now());
 
-        orderRepository.save(entity);
+        Order cancelled = orderRepository.save(entity);
+        return mapper.map(cancelled, OrderModel.class);
     }
 }

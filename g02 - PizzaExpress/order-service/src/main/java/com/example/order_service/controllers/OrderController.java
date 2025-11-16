@@ -100,14 +100,15 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable("id") Long id) {
-        orderService.cancelOrder(id);
+    public ResponseEntity<ApiResponse<OrderResponse>> cancel(@PathVariable("id") Long id) {
+        OrderModel order = orderService.cancelOrder(id);
 
+        OrderResponse response = mapper.map(order, OrderResponse.class);
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         true,
                         "Order cancelled successfully",
-                        null
+                        response
                 )
         );
     }

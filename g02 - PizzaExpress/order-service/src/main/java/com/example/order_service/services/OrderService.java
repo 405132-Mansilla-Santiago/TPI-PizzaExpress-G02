@@ -26,5 +26,5 @@ public interface OrderService {
 
     OrderModel updateStatus(Long id, OrderStatus status);
 
-    void cancelOrder(Long id);
+    OrderModel cancelOrder(Long id);
 }
